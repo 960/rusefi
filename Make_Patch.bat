@@ -1,0 +1,1 @@
+git diff -M head > file.patch
