@@ -63,15 +63,19 @@ void PeriodicTask() override {
 				}
 				activateSwitchCondition = engine->launchActivatePinState;
 
-			   }else if (engineConfiguration->launchActivationMode == CLUTCH_INPUT_LAUNCH) {
-				if (CONFIG(clutchDownPin) != GPIO_UNASSIGNED) {
-					engine->clutchDownState = efiReadPin(CONFIG(clutchDownPin));
-	           }
-				activateSwitchCondition = engine->clutchDownState;
-
-			   } else if (engineConfiguration->launchActivationMode == ALWAYS_ACTIVE_LAUNCH) {
-				   activateSwitchCondition = true;
 			   }
+	else if (engineConfiguration->launchActivationMode == CLUTCH_INPUT_LAUNCH) {
+			if (CONFIG(clutchDownPin) != GPIO_UNASSIGNED) {
+				engine->clutchDownState = efiReadPin(CONFIG(clutchDownPin));
+	           	}
+			activateSwitchCondition = engine->clutchDownState;
+
+	} 
+
+	activateSwitchCondition = activateSwitchCondition||(engineConfiguration->launchActivationMode == ALWAYS_ACTIVE_LAUNCH);
+		
+		
+}
 	bool rpmCondition = (launchRpmValue < rpm);
 	bool tpsCondition = (tpstreshold < tps);
 
@@ -91,15 +95,11 @@ void PeriodicTask() override {
 			}
 
 
-	 if (engine->isLaunchCondition == true) {
-	 engine->setLaunchBoostDuty = true;
-	 engine->applyLaunchControlRetard = true;
-	 }
-	 else {
-		 engine->setLaunchBoostDuty = false;
-	     engine->applyLaunchControlRetard = false;
 
-	 }
+	 engine->setLaunchBoostDuty = engine->isLaunchCondition;
+	 engine->applyLaunchControlRetard = engine->isLaunchCondition;
+
+
 
   }
 
@@ -125,12 +125,8 @@ void setDefaultLaunchParameters(DECLARE_CONFIG_PARAMETER_SIGNATURE) {
 
 
 void applyLaunchControlLimiting(bool *limitedSpark, bool *limitedFuel DECLARE_ENGINE_PARAMETER_SUFFIX) {
-	if ((engine->isLaunchCondition) && (engineConfiguration->launchSparkCutEnable)) {
-		*limitedSpark = true;
-	}
-	if ((engine->isLaunchCondition == true) && (engineConfiguration->launchFuelCutEnable == true)) {
-			*limitedFuel = true;
-	}
+	*limitedSpark = ((engine->isLaunchCondition) && (engineConfiguration->launchSparkCutEnable)) ;
+	*limitedFuel = ((engine->isLaunchCondition) && (engineConfiguration->launchFuelCutEnable));
 }
 
 
