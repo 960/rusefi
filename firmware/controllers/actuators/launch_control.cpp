@@ -61,18 +61,14 @@ void PeriodicTask() override {
 				if (CONFIG(launchActivatePin) != GPIO_UNASSIGNED) {
 					engine->launchActivatePinState = efiReadPin(CONFIG(launchActivatePin));
 				}
-				activateSwitchCondition = engine->launchActivatePinState;
-
-			   }
+	}
 	else if (engineConfiguration->launchActivationMode == CLUTCH_INPUT_LAUNCH) {
 			if (CONFIG(clutchDownPin) != GPIO_UNASSIGNED) {
 				engine->clutchDownState = efiReadPin(CONFIG(clutchDownPin));
 	           	}
-			activateSwitchCondition = engine->clutchDownState;
-
 	} 
 
-	activateSwitchCondition = activateSwitchCondition||(engineConfiguration->launchActivationMode == ALWAYS_ACTIVE_LAUNCH);
+	activateSwitchCondition = engine->launchActivatePinState||engine->clutchDownState||(engineConfiguration->launchActivationMode == ALWAYS_ACTIVE_LAUNCH);
 		
 		
 }
